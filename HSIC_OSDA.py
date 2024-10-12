@@ -266,7 +266,6 @@ def classification_accuracy():
         acc_per_class = torch.zeros(n_classes)
         for i in range(n_classes):
             acc_per_class[i] = torch.sum((pred==lab_t)*(lab_t==i))/torch.sum(lab_t==i)
-        print(acc_per_class)
     OS = torch.mean(acc_per_class[0:n_classes-1])
     Unk = acc_per_class[n_classes-1]
     correct = (2*OS*Unk/(OS+Unk)).cpu().float()
@@ -299,20 +298,6 @@ def One_Hot(lab, num_cls):
     
     return lab_mat
 
-def Weighting_ERM_loss(pred, lab, num_cls, weight_ratio):
-    # p: source density, q: target density
-    # pred: [sample-size * class number] posterior prediction matrix of source data
-    # lab: [sample-size] ground-truth label vector of source data
-    # num_cls: scalar of class number
-    # weight_ratio: [class number] class weight vector as q_y/p_y
-    one_hot_lab = One_Hot(lab, num_cls)
-    pred_score = (one_hot_lab.mul(pred)).sum(1)
-    Cross_Entropy = -(pred_score+1e-6).log()
-    pred_weight = weight_ratio[lab]
-    
-    weighting_ERM = (Cross_Entropy.mul(pred_weight)).mean()
-    
-    return weighting_ERM
 
 def dist(x,y):
     xx = torch.sum(torch.mul(x,x),dim=1).reshape(x.shape[0],1).repeat(1,y.shape[0])
